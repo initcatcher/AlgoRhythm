@@ -13,9 +13,11 @@ for (let i = 0; i < n; i++) {
     if (sum + w[j] <= c) {   // 가능하면 먹기
       sum += w[j];
       count++;
-    }                        // 넘치면 그 과일만 건너뛰고 계속
+    }
+    if(count + (n-j-1) < maxCount) break;
   }
   if (count > maxCount) maxCount = count;
+
 }
 
 console.log(String(maxCount));
