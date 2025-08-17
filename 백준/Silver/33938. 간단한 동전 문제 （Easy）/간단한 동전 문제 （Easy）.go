@@ -33,36 +33,46 @@ func main(){
 		return
 	}
 
-	// BFS를 위한 큐와 방문 체크용 맵
-	queue := []int{0}
-	visited := make(map[int]int) // 금액 -> 최소 동전 개수
-	visited[0] = 0
+	// 가장 최적화된 방법: 배열 + BFS
+	const MAX_RANGE = 2001 // -1000 ~ 1000 (인덱스 0~2000)
+	dist := make([]int, MAX_RANGE)
+	for i := range dist {
+		dist[i] = -1 // 미방문 표시
+	}
+	
+	queue := make([]int, 0, MAX_RANGE)
+	start := 1000 // 0을 인덱스 1000으로 매핑
+	dist[start] = 0
+	queue = append(queue, start)
+	front := 0
 
-	for len(queue) > 0 {
-		current := queue[0]
-		queue = queue[1:]
+	for front < len(queue) {
+		current := queue[front]
+		front++
+		currentVal := current - 1000 // 실제 금액
 
 		// 목표 금액에 도달했으면 결과 출력
-		if current == m {
-			fmt.Println(visited[m])
+		if currentVal == m {
+			fmt.Println(dist[current])
 			return
 		}
 
 		// 각 동전을 사용해 다음 상태로 이동
 		for _, coin := range coins {
-			next := current + coin
+			nextVal := currentVal + coin
+			next := nextVal + 1000 // 배열 인덱스로 변환
 			
-			// 범위 체크 (-1000 ~ 1000)
-			if next < -1000 || next > 1000 {
+			// 범위 체크
+			if next < 0 || next >= MAX_RANGE {
 				continue
 			}
 
 			// 이미 방문했으면 스킵
-			if _, exists := visited[next]; exists {
+			if dist[next] != -1 {
 				continue
 			}
 
-			visited[next] = visited[current] + 1
+			dist[next] = dist[current] + 1
 			queue = append(queue, next)
 		}
 	}
