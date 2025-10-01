@@ -1,44 +1,42 @@
 from collections import defaultdict
 
-def cal_time(time):
-    h,m = map(int, time.split(':'))
-    return h*60 + m
+def parse_time_to_minutes(time):
+    hours, minutes = map(int, time.split(':'))
+    return hours * 60 + minutes
 
-def cal_cost(fees, time):
-    basic_time, basic_fee, time_barometer, time_fee = fees
+def calculate_parking_fee(fees, time):
+    base_time, base_fee, unit_time, unit_fee = fees
     
-    time -= basic_time
-    baro = 0
+    time -= base_time
+    extra_units = 0
     if time > 0:
-        baro = time//time_barometer
-        if time%time_barometer:
-            baro += 1
+        extra_units = time // unit_time
+        if time % unit_time:
+            extra_units += 1
     
-    return basic_fee + baro * time_fee
+    return base_fee + extra_units * unit_fee
 
 def solution(fees, records):
+    base_time, base_fee, unit_time, unit_fee = fees
     
-    basic_time, basic_fee, time_deli, time_fee = fees
+    entry_times = {}
+    total_parking_times = defaultdict(int)
     
-    table = {}
-    answer = defaultdict(int)
     for record in records:
-        time, car, in_out = record.split()
+        time_str, car_number, status = record.split()
         
-        time_cal = cal_time(time)
-        if in_out == 'IN':
-            table[car] = time_cal
+        time_in_minutes = parse_time_to_minutes(time_str)
+        if status == 'IN':
+            entry_times[car_number] = time_in_minutes
         else:
-            answer[car] += time_cal - table[car]
-            table[car] = -1
-    midnight = cal_time('23:59')
-    for car,time in table.items():
-        if time == -1:
-            continue
-        answer[car] += midnight - time
+            total_parking_times[car_number] += time_in_minutes - entry_times[car_number]
+            entry_times[car_number] = None
     
-    cost = []
-    for car in sorted(answer.keys()):
-        cost.append(cal_cost(fees,answer[car]))
-
-    return cost
+    midnight = parse_time_to_minutes('23:59')
+    for car_number, entry_time in entry_times.items():
+        if entry_time is not None:
+            total_parking_times[car_number] += midnight - entry_time
+    
+    
+    return [calculate_parking_fee(fees, total_parking_times[car_number])
+           for car_number in sorted(total_parking_times.keys())]
