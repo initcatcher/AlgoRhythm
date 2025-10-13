@@ -11,9 +11,7 @@ for _ in range(M):
 d = [0] * (N+1)
 
 for day, page in books:
-    for i in range(N, -1, -1):
-        if d[i] and i+day <= N:
-            d[i+day] = max(d[i]+page, d[i+day])
-    if day <= N:
-        d[day] = max(page, d[day])
+    for i in range(N, day -1, -1):
+        d[i] = max(d[i-day]+page, d[i])
+
 print(max(d))
